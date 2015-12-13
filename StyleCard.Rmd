@@ -1,0 +1,131 @@
+---
+title: "StyleCard"
+author: "Bodil Biering"
+date: "22 November 2015"
+output: html_document
+runtime: shiny
+---
+Eksempel på stilstamkort.
+
+
+```{r readdata, cache=TRUE, echo=FALSE}
+#TODO: lav tidydata med stilscore og alting så det er nemt at lave renderUI.
+#TODO: lav histogram for at vise stilDNA
+
+#start med at lave et stilkort færdig og send til Rikke. Bagefter lave interaktivt.
+#overvej at lave til shinyapp, kan den gøres privat? Ja, det ser det ud til.
+#tjek http://shiny.rstudio.com/articles/interactive-docs.html
+
+#load data
+source("stilstamkort.R")
+
+row <- 3
+```
+
+```{r}
+library("lubridate")
+choice <- data[,"Fornavn"]
+selectInput("inputrow", "", c(1, 2))
+```
+
+```{r}
+renderText({
+    #row <- get(input$inputrow)
+    row <- input$inputrow
+    "You have selected:" 
+    row
+    
+})
+
+
+```
+
+##Personligt
+```{r, cache=FALSE, echo=FALSE}
+fornavn <- data[row,"Fornavn"]
+efternavn <- data[row, "Efternavn"]
+alder <- year(Sys.Date()) - data[row, 5]
+job <- data[row, 134]
+```
+
+Row = `r row`
+
+Navn: `r tidydata[row,"navn"]`
+
+Alder: `r tidydata[row, "alder"]`
+
+Beskæftigelse: `r tidydata[row, "job"]` 
+
+evt. billede: TODO # spm 49
+
+###Størrelser
+TODO
+
+Højde: `r tidydata[row, "højde"]` cm
+
+Vægt: `r tidydata[row, "vægt"]` kg
+
+BH: `r tidydata[row, "bhStr"]`
+
+Kjole: `r tidydata[row, "kjole"]`
+
+Overdel: `r tidydata[row, "overdel"]`
+
+Underdel: `r tidydata[row, "underdel"]`
+
+###Kropsform
+TODO: spm 12-14
+
+##StilDNA
+
+```{r, echo=FALSE}
+
+
+```
+*Stilscore (fra 0 til 6 på hver kerne):*
+Afslappet: `r tidydata[row,"a"]`
+Boheme: `r tidydata[row,"b"]`
+Enkel: `r tidydata[row,"e"]`
+Feminin: `r tidydata[row,"f"]`
+Klassisk: `r tidydata[row,"k"]`
+Rå: `r tidydata[row,"r"]`
+
+Kommentar til billeder: TODO
+
+*Det tøj jeg har det bedst i:* `r data[row, 138]` TODO: eller billede.
+
+Mærker i skabet: TODO
+
+Eventyrlyst: TODO
+
+UNDGÅ: spm 36-38 + 44
+
+
+Kjoler eller bukser: spm43
+
+Dresscode: spm 46
+
+Budget (pr md (tidligere år) uden sko): spm 47
+
+
+
+###Hvordan skal tøjet sidde
+
+spm 39-42. TODO: hvis man vælger løst skal det måske afspejles i afslappet stilkerne.
+
+###Ekstra info
+```{r, cache=FALSE, echo=FALSE}
+pinterest <- data[row, 140]
+kommentar <- data[row, 141]
+
+```
+
+*Pinterest:*
+`r pinterest`
+
+*Kommentarer:*
+`r kommentar`
+
+
+
+
