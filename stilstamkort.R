@@ -18,6 +18,7 @@ tidydata <- cbind(tidydata, højde, vægt)
 #functions
 myprint <- function(r) {r2 <- r[!is.na(r)]; r2 <- r2[r2 != ""]; paste(r2, collapse = ", ")}
 myprintRes <- function(f) {unlist(apply(f,1, myprint))}
+trim <- function(x) {if(is.na(x) || x == "") return("[NA]") else return(x)}
 
 #kjole, spm 7
 kjole <- data.frame(data[, 8:17], stringsAsFactors = T) 
@@ -55,7 +56,8 @@ rå <- c(18, 27, 30) + 28
 
 #translate
 trans <- function(t) {
-    if(t == "Hader det!"|| t == "") {return(0)}
+    if(t == "Hader det!"|| t == "" || t == "Det er slet ikke mig!") {return(0)}
+    else if(t == "Jeg er ikke så vild med det.") {return(0.5)}
     else if(t == "Hm, måske.") {return(1)}
     else if(t == "Det er lige mig.") {return(2)}
     else return("fejl!")
@@ -68,16 +70,17 @@ f <- apply(data[, feminin], 1, function(x) sum(sapply(x, trans)))
 k <- apply(data[, klassisk], 1, function(x) sum(sapply(x, trans)))
 r <- apply(data[, rå], 1, function(x) sum(sapply(x, trans)))
 
-tidydata <- cbind(tidydata, a = unlist(a))
-tidydata <- cbind(tidydata, b = unlist(b))
-tidydata <- cbind(tidydata, e = unlist(e))
-tidydata <- cbind(tidydata, f = unlist(f))
-tidydata <- cbind(tidydata, k = unlist(k))
-tidydata <- cbind(tidydata, r = unlist(r))
+tidydata <- cbind(tidydata, Afslappet = unlist(a))
+tidydata <- cbind(tidydata, Boheme = unlist(b))
+tidydata <- cbind(tidydata, Enkel = unlist(e))
+tidydata <- cbind(tidydata, Feminin = unlist(f))
+tidydata <- cbind(tidydata, Klassisk = unlist(k))
+tidydata <- cbind(tidydata, Rå = unlist(r))
 
 tidydata <- cbind(tidydata, billedKommentar = data[,61])
 
-#Det tøj jeg har det bedst i row 138 eller billede, spm 48 a= foto og b= tekst TODO
+#Det tøj jeg har det bedst i row 138 eller billede, spm 48 a= foto og b= tekst
+tidydata <- cbind(tidydata, favorittøj = data[,138])
 
 #Mærker i skabet: spm 34
 mærker <- data.frame(data[, 62:88], stringsAsFactors = T)
@@ -109,7 +112,7 @@ tidydata <- cbind(tidydata, budget = data[,136])
 
 #Hvordan skal tøjet sidde
 
-#spm 39-42. TODO: hvis man vælger løst skal det måske afspejles i afslappet stilkerne.
+#spm 39-42.
 tidydata <- cbind(tidydata, overkropFit = data[,118])
 tidydata <- cbind(tidydata, underkropFit = data[,119])
 
@@ -123,3 +126,4 @@ tidydata <- cbind(tidydata, dække = myprintRes(dække))
 tidydata <- cbind(tidydata, pinterest = data[,140])
 #kommentar, spm 51
 tidydata <- cbind(tidydata, slutkommentar = data[,141])
+

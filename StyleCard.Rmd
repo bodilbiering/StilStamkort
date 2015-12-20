@@ -1,7 +1,7 @@
 ---
-title: "StyleCard"
-author: "Bodil Biering"
-date: "22 November 2015"
+title: "Style Card"
+#author: "Bodil Biering"
+#date: "22 November 2015"
 output: html_document
 runtime: shiny
 ---
@@ -10,11 +10,14 @@ Eksempel på stilstamkort.
 
 ```{r readdata, cache=TRUE, echo=FALSE}
 #TODO: lav tidydata med stilscore og alting så det er nemt at lave renderUI.
-#TODO: lav histogram for at vise stilDNA
+#"TODO: stilscore tekst in i plot"
+#TODO: lav de 9 kropstype samt BMI
+
 
 #start med at lave et stilkort færdig og send til Rikke. Bagefter lave interaktivt.
 #overvej at lave til shinyapp, kan den gøres privat? Ja, det ser det ud til.
 #tjek http://shiny.rstudio.com/articles/interactive-docs.html
+#http://shiny.rstudio.com/articles/basics.html
 
 #load data
 source("stilstamkort.R")
@@ -26,105 +29,156 @@ row <- 3
 library("lubridate")
 choice <- data[,"Fornavn"]
 selectInput("inputrow", "", c(1, 2))
+
 ```
 
-```{r}
+```{r, echo=FALSE}
 renderText({
     #row <- get(input$inputrow)
     row <- input$inputrow
     "You have selected:" 
     row
+    myRow <- tidydata[row,]
+    myRow$navn
     
 })
 
 
+myRow <- reactive({
+  get(tidydata[input$inputrow,])
+})
+
+renderPrint({
+    
+    myRow$navn
+})
 ```
+
 
 ##Personligt
 ```{r, cache=FALSE, echo=FALSE}
-fornavn <- data[row,"Fornavn"]
-efternavn <- data[row, "Efternavn"]
-alder <- year(Sys.Date()) - data[row, 5]
-job <- data[row, 134]
+myRow <- tidydata[row,]
 ```
 
 Row = `r row`
 
-Navn: `r tidydata[row,"navn"]`
+irow = 
+`r renderText({
+tidydata[input$inputrow,"navn"]
+})`
 
-Alder: `r tidydata[row, "alder"]`
+**Navn:** `r trim(myRow$navn)`
 
-Beskæftigelse: `r tidydata[row, "job"]` 
+**Alder:** `r trim(myRow$alder)`
 
-evt. billede: TODO # spm 49
+**Beskæftigelse:** `r trim(myRow$job)` 
+
+
+**Fuld figur billede:**
+```{r, fig.width=4, echo=FALSE}
+billede <- paste(myRow$email,".jpg", sep = "")
+path = paste("./images/fuld-figur-upload/", billede, sep = "")
+width <- if(file.exists(path)) "300" else ""
+```
+<img src="images/fuld-figur-upload/`r billede`" alt="fuld figur"
+width=`r width`>
+
+
 
 ###Størrelser
-TODO
 
-Højde: `r tidydata[row, "højde"]` cm
+**Højde:** `r trim(myRow$højde)` cm
 
-Vægt: `r tidydata[row, "vægt"]` kg
+**Vægt:** `r trim(myRow$vægt)` kg
 
-BH: `r tidydata[row, "bhStr"]`
+**BH:** `r trim(myRow$bhStr)`
 
-Kjole: `r tidydata[row, "kjole"]`
+**Kjole:** `r trim(myRow$kjole)`
 
-Overdel: `r tidydata[row, "overdel"]`
+**Overdel:** `r trim(myRow$overdel)`
 
-Underdel: `r tidydata[row, "underdel"]`
+**Underdel:** `r trim(myRow$underdel)`
 
 ###Kropsform
-TODO: spm 12-14
+**Skuldre/hofter:** `r trim(myRow$skuldre)`
+
+**Overkrop/underkrop:** `r trim(myRow$ben)`
+
+**Særligt vedr. kropsform, der skal tages hensyn til:** `r trim(myRow$særligt)`
+
+![](images/human-body-female-test.png)
 
 ##StilDNA
 
 ```{r, echo=FALSE}
-
-
+library(ggplot2)
+library(gridExtra)
+stilscore <-  myRow[c("Afslappet", "Boheme", "Enkel", "Feminin", "Klassisk", "Rå")]
+qplot(names(stilscore), as.numeric(stilscore)) + geom_bar(stat = "identity", fill="salmon", width=0.4) + xlab("Platform") + ylab("score")
 ```
-*Stilscore (fra 0 til 6 på hver kerne):*
-Afslappet: `r tidydata[row,"a"]`
-Boheme: `r tidydata[row,"b"]`
-Enkel: `r tidydata[row,"e"]`
-Feminin: `r tidydata[row,"f"]`
-Klassisk: `r tidydata[row,"k"]`
-Rå: `r tidydata[row,"r"]`
 
-Kommentar til billeder: TODO
+*Stilscore (fra 0 til 6 på hver platform):*
 
-*Det tøj jeg har det bedst i:* `r data[row, 138]` TODO: eller billede.
+<!--
+Afslappet: `r tidydata[row,"Afslappet"]`
+Boheme: `r tidydata[row,"Boheme"]`
+Enkel: `r tidydata[row,"Enkel"]`
+Feminin: `r tidydata[row,"Feminin"]`
+Klassisk: `r tidydata[row,"Klassisk"]`
+Rå: `r tidydata[row,"Rå"]`
+-->
 
-Mærker i skabet: TODO
+**Kommentar til billeder:** `r trim(myRow$billedKommentar)`
 
-Eventyrlyst: TODO
+**Det tøj jeg har det bedst i:** `r trim(myRow$favorittøj)` 
 
-UNDGÅ: spm 36-38 + 44
+```{r, echo=FALSE}
+path = paste("./images/favorit-toej-upload/", billede, sep = "")
+width <- if(file.exists(path)) "300" else ""
+```
+<img src="`r path`" alt="favorit sæt"
+width=`r width`>
 
 
-Kjoler eller bukser: spm43
+**Mærker i skabet:** `r trim(myRow$mærker)`
 
-Dresscode: spm 46
+**Eventyrlyst:** `r trim(myRow$eventyrlyst)`
 
-Budget (pr md (tidligere år) uden sko): spm 47
+**UNDGÅ:**
 
+**Materialer:** `r trim(myRow$undgåMaterialer)`
+
+**Farver:** `r trim(myRow$undgåFarver)`
+
+**Print:** `r trim(myRow$undgåPrint)`
+
+**Det vil jeg aldrig gå med:** `r  trim(myRow$aldrig)`
+
+
+**Kjoler eller bukser:** `r trim(myRow$kjolerBukser)`
+
+**Dresscode:** `r trim(myRow$dresscode)`
+
+**Budget pr md (tidligere år) uden sko: kr** `r trim(myRow$budget)`
 
 
 ###Hvordan skal tøjet sidde
 
-spm 39-42. TODO: hvis man vælger løst skal det måske afspejles i afslappet stilkerne.
+**Løst eller tæt på overkrop?:** `r trim(myRow$overkropFit)`
+
+**Løst eller tæt på underkrop?:** `r trim(myRow$underkropFit)`
+
+**Det vil jeg gerne vise frem:** `r trim(myRow$vise)`
+
+**Det vil jeg gerne dække:** `r trim(myRow$dække)`
 
 ###Ekstra info
-```{r, cache=FALSE, echo=FALSE}
-pinterest <- data[row, 140]
-kommentar <- data[row, 141]
-
-```
 
 *Pinterest:*
-`r pinterest`
+`r trim(myRow$pinterest)`
 
 *Kommentarer:*
-`r kommentar`
+`r trim(myRow$slutkommentar)`
 
 
 
