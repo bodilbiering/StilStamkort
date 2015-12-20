@@ -43,7 +43,6 @@ renderText({
     
 })
 
-
 myRow <- reactive({
   get(tidydata[input$inputrow,])
 })
