@@ -14,11 +14,24 @@ tidydata <- data.frame(navn, email, alder, job, bhStr)
 højde <- data[, 38]
 vægt <- data[,39]
 tidydata <- cbind(tidydata, højde, vægt)
+bmi <- vægt / (højde/100)^2
+tidydata <- cbind(tidydata, bmi = round(bmi))
 
 #functions
 myprint <- function(r) {r2 <- r[!is.na(r)]; r2 <- r2[r2 != ""]; paste(r2, collapse = ", ")}
 myprintRes <- function(f) {unlist(apply(f,1, myprint))}
 trim <- function(x) {if(is.na(x) || x == "") return("[NA]") else return(x)}
+get_bodyshape <- function(s,b) {
+    if(grepl("lige brede", s)) {x = "ligebred"}
+    else if(grepl("hofterne er bredest", s)) {x = "hoftebred"}
+    else if(grepl("skuldrene er bredest", s)) {x = "skulderbred"}
+    
+    if(grepl("Gennemsnitlig", b)) {y = "ligelang"}
+    else if(grepl("Lange ben", b)) {y = "langeben"}
+    else if(grepl("Korte ben", b)) {y = "korteben"}
+    
+    return(paste(x,y, sep='-'))
+}
 
 #kjole, spm 7
 kjole <- data.frame(data[, 8:17], stringsAsFactors = T) 
@@ -36,6 +49,9 @@ tidydata <- cbind(tidydata, underdel = myprintRes(underdel))
 tidydata <- cbind(tidydata, skuldre = data[,40])
 tidydata <- cbind(tidydata, ben = data[,41])
 tidydata <- cbind(tidydata, særligt = data[,42])
+
+tidydata <- cbind(tidydata, bodyshape = 
+                      apply(tidydata[,c("skuldre", "ben")], 1, function(x){get_bodyshape(x[1], x[2])}))
 
 #make styleDNA card, billeder spm 15-32 og kommentar til billeder spm 33
 #billeder starter ved 15 i stilquiz, kolonne 43 i data
